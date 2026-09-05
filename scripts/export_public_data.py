@@ -54,7 +54,8 @@ def main():
                   'event_post_id','parent_post_id','event_created_at','observed_at','lookup_status',
                   'root_created_at','root_first_seen_at','root_theme_primary','root_message_function',
                   'root_media_types','root_hashtag_count','root_url_count','root_account_followers_count',
-                  'root_crisis_phase','root_tracking_status'] + METRICS
+                  'root_crisis_phase','root_tracking_status','root_crisis_relevance','root_urgency_level',
+                  'event_theme_primary','event_crisis_relevance','event_urgency_level'] + METRICS
         rows = connection.execute(sql.SQL('SELECT {} FROM {}.{} ORDER BY observation_date_chicago,root_post_id,event_post_id').format(
             sql.SQL(',').join(map(sql.Identifier, fields)), sql.Identifier('fda_x_daily_snapshots'), sql.Identifier(table))).fetchall()
         root_ids = {r['root_post_id'] for r in rows}
@@ -73,6 +74,7 @@ def main():
             observed_entity_count,missing_entity_count,attempt_coverage_pct,coverage_pct
             FROM fda_x_derived.daily_collection_integrity WHERE collection_date<=%s ORDER BY collection_date,mechanism""",(latest,)).fetchall()
     roots = {}
+    quote_coding = {}
     observations = []
     grains = set()
     for r in rows:
@@ -87,7 +89,12 @@ def main():
                 firstSeen=day(r['root_first_seen_at']),summary=summaries.get(root) or 'FDA public communication',
                 theme=r['root_theme_primary'] or 'Pending coding',messageFunction=r['root_message_function'],
                 media=r['root_media_types'],hashtags=r['root_hashtag_count'],links=r['root_url_count'],
-                crisisPhase=r['root_crisis_phase'],tracking=r['root_tracking_status'])
+                crisisPhase=r['root_crisis_phase'],crisisRelevance=r['root_crisis_relevance'],
+                urgencyLevel=r['root_urgency_level'],tracking=r['root_tracking_status'])
+        if r['mechanism'] == 'quote_post':
+            quote_coding[(root, r['event_post_id'])] = dict(
+                theme=r['event_theme_primary'] or 'Pending coding',
+                crisisRelevance=r['event_crisis_relevance'],urgencyLevel=r['event_urgency_level'])
         observations.append(dict(root=root,node=node_id(r['event_post_id'],root_ids),date=date,
             mechanism=r['mechanism'],status=r['lookup_status'],metrics=[r[m] for m in METRICS]))
     nodes=[]
@@ -95,10 +102,14 @@ def main():
         if not e['parent_link_payload_verified']:
             continue
         mechanism = {'quote':'quote_post','quote_repost':'quote_repost','repost':'level_1_repost' if e['diffusion_level']==1 else 'repost_descendant'}[e['event_type']]
-        nodes.append(dict(id=node_id(e['event_post_id'],root_ids),parent=node_id(e['parent_post_id'],root_ids) if e['parent_post_id'] else None,
-            root=e['root_post_id'],mechanism=mechanism,level=e['diffusion_level'],created=day(e['event_created_at']),firstSeen=day(e['first_seen_at'])))
+        node = dict(id=node_id(e['event_post_id'],root_ids),parent=node_id(e['parent_post_id'],root_ids) if e['parent_post_id'] else None,
+            root=e['root_post_id'],mechanism=mechanism,level=e['diffusion_level'],created=day(e['event_created_at']),firstSeen=day(e['first_seen_at']))
+        if mechanism == 'quote_post':
+            node.update(quote_coding.get((e['root_post_id'], e['event_post_id']), dict(
+                theme='Pending coding',crisisRelevance=None,urgencyLevel=None)))
+        nodes.append(node)
     dates = sorted({r['date'] for r in observations})
-    data=dict(version=1,timezone='America/Chicago',asOf=latest.isoformat(),collectionCompletedAt=run['completed_at'].isoformat(),
+    data=dict(version=2,timezone='America/Chicago',asOf=latest.isoformat(),collectionCompletedAt=run['completed_at'].isoformat(),
         sourceSnapshot=f'fda_x_daily_snapshots.{table}',accounts=ACCOUNTS,metrics=METRICS,dates=dates,
         roots=sorted(roots.values(), key=lambda r:(r['created'],r['id'])),nodes=nodes,observations=observations,
         integrity=[dict(date=day(r['collection_date']),mechanism=r['mechanism'],expected=r['expected_entity_count'],

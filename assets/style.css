@@ -359,6 +359,27 @@ main {
   margin-top: 8px;
   min-height: 34px;
 }
+.analysis-context {
+  color: var(--muted);
+  font-size: 12px;
+  line-height: 1.7;
+  padding: 0 0 18px;
+}
+#content > .analysis-context:last-child {
+  padding-top: 20px;
+}
+#content .category-chart {
+  height: 420px;
+}
+#category-flow {
+  height: 460px;
+}
+.content-controls {
+  flex-wrap: wrap;
+}
+.content-controls select {
+  max-width: 170px;
+}
 .segmented {
   display: flex;
   flex-shrink: 0;
@@ -815,7 +836,7 @@ footer a {
   .tabs button,
   .tabs button:first-child {
     flex: 1;
-    width: 25%;
+    width: 20%;
     height: 62px;
     padding: 10px 3px;
     flex-direction: column;

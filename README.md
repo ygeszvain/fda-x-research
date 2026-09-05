@@ -13,6 +13,11 @@ across FDA, FDADrugs, FDAFood, FDADevices, FDATobacco, and FDARecalls on X.
   playback, expandable repost groups, and individual node metrics.
 - **Post trajectories:** views, likes, reposts, replies, quotes, and bookmarks,
   plus a post-by-day net-change heatmap.
+- **Themes & crisis:** distinct content counts, median daily counters, mean daily
+  trajectories and matched changes, observed events per root, and original-to-quote
+  category associations. Compare themes, crisis relevance, or urgency, separately
+  for originals and quote-authored content. Crisis-related message growth and
+  recorded original-post crisis phases are also shown.
 - **Data & methods:** returned versus attempted coverage and research definitions.
 
 Accounts, themes, and Chicago dates can be filtered. Plots can be downloaded as
@@ -39,6 +44,22 @@ below two. Root tracking can pause after two consecutive zero-change daily
 intervals, with mandatory day-30, day-60, and day-90 observations. Predictions must
 use earlier-created roots for training and later-created roots for testing.
 All snapshots of a root stay together; preprocessing is fitted on training only.
+
+Original and quote nodes include current primary theme, crisis relevance, and
+urgency labels. Repost events are not independently coded. Quote engagement uses
+the quote's own theme, not the root's theme; repeated snapshots and multi-root
+reachability do not duplicate authored-post counts. Diffusion bars count unique
+root/event/mechanism relationships, with zero-edge roots in the denominator.
+The root-to-quote matrix includes deeper quotes but is not an immediate-parent
+transition matrix. Smaller categories are explicitly pooled; missing counters
+are excluded, not treated as zero. Available and matched sample sizes accompany
+the engagement comparisons. Unequal post ages and account mix are not adjusted.
+
+Crisis relevance describes content, not an externally validated crisis period.
+`stable` is the collection pipeline's default crisis phase when no documented
+window matches, including when context data is absent. It must not be interpreted
+as independent evidence that a crisis did not occur. A single observed phase
+cannot support a between-phase comparison. Quote crisis phases are not inferred.
 
 Themes reflect current coding applied to historical observations; the date
 filter does not reconstruct the codebook as it existed on a past date. Daily

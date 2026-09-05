@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="assets/style.css" />
     <script defer src="assets/vendor/echarts.min.js"></script>
     <script defer src="assets/vendor/lucide.min.js"></script>
+    <script defer src="assets/content.js"></script>
     <script defer src="assets/app.js"></script>
   </head>
   <body>
@@ -57,6 +58,9 @@
         </button>
         <button data-view="trajectories">
           <i data-lucide="activity"></i> Post trajectories
+        </button>
+        <button data-view="content">
+          <i data-lucide="tags"></i> Themes &amp; crisis
         </button>
         <button data-view="methods">
           <i data-lucide="database"></i> Data &amp; methods
@@ -364,6 +368,252 @@
             Cells show net change between consecutive returned daily snapshots.
             A blank cell means no comparable pair; first observations are not
             assigned a zero baseline.
+          </p>
+        </section>
+        <section id="content" class="view" hidden>
+          <div class="section-heading">
+            <div>
+              <span class="section-index">01</span>
+              <h2>Message categories &amp; engagement</h2>
+            </div>
+            <div class="control-group content-controls">
+              <select id="content-dimension" aria-label="Content grouping">
+                <option value="theme">Theme</option>
+                <option value="crisisRelevance">Crisis relevance</option>
+                <option value="urgencyLevel">Urgency</option>
+              </select>
+              <select id="content-scope" aria-label="Content post type">
+                <option value="original_post">Original posts</option>
+                <option value="quote_post">Quote posts</option>
+              </select>
+              <select
+                id="content-metric"
+                aria-label="Content engagement metric"
+              ></select>
+            </div>
+          </div>
+          <p
+            class="analysis-context"
+            id="content-context"
+            aria-live="polite"
+          ></p>
+          <div class="chart-grid">
+            <article class="chart-block">
+              <div class="chart-heading">
+                <h3>Distinct posts by category</h3>
+                <button
+                  class="icon-button"
+                  data-save="category-count"
+                  title="Download chart"
+                  aria-label="Download category counts"
+                >
+                  <i data-lucide="image-down"></i>
+                </button>
+              </div>
+              <div
+                id="category-count"
+                class="chart category-chart"
+                role="img"
+                aria-label="Distinct authored posts by category"
+              ></div>
+              <p class="chart-note">
+                One count per authored post, not per snapshot. Ordinary repost
+                events do not receive independent content labels.
+              </p>
+            </article>
+            <article class="chart-block">
+              <div class="chart-heading">
+                <h3 id="category-level-title">Median views per post</h3>
+                <button
+                  class="icon-button"
+                  data-save="category-level"
+                  title="Download chart"
+                  aria-label="Download category engagement"
+                >
+                  <i data-lucide="image-down"></i>
+                </button>
+              </div>
+              <div
+                id="category-level"
+                class="chart category-chart"
+                role="img"
+                aria-label="Median cumulative engagement per post by category"
+              ></div>
+              <p class="chart-note">
+                Returned counters on the selected date only. Tooltips report
+                available and eligible post counts. Post ages and accounts
+                differ; these are not causal effects.
+              </p>
+            </article>
+          </div>
+          <div class="chart-grid">
+            <article class="chart-block">
+              <div class="chart-heading">
+                <h3 id="category-growth-title">
+                  Mean cumulative views per post
+                </h3>
+                <button
+                  class="icon-button"
+                  data-save="category-growth"
+                  title="Download chart"
+                  aria-label="Download category trajectories"
+                >
+                  <i data-lucide="image-down"></i>
+                </button>
+              </div>
+              <div
+                id="category-growth"
+                class="chart"
+                role="img"
+                aria-label="Daily mean cumulative engagement by category"
+              ></div>
+              <p class="chart-note">
+                Each date averages available returned counters within each
+                category. Cohort admissions and missing values can change the
+                denominator.
+              </p>
+            </article>
+            <article class="chart-block">
+              <div class="chart-heading">
+                <h3 id="category-change-title">Mean daily change in views</h3>
+                <button
+                  class="icon-button"
+                  data-save="category-change"
+                  title="Download chart"
+                  aria-label="Download category daily changes"
+                >
+                  <i data-lucide="image-down"></i>
+                </button>
+              </div>
+              <div
+                id="category-change"
+                class="chart"
+                role="img"
+                aria-label="Mean matched daily engagement changes by category"
+              ></div>
+              <p class="chart-note">
+                Same posts on adjacent Chicago dates, both returned with
+                non-null counters. Missing pairs stay blank; negative counter
+                corrections remain visible.
+              </p>
+            </article>
+          </div>
+          <div class="section-heading">
+            <div>
+              <span class="section-index">02</span>
+              <h2>Categories in observed diffusion</h2>
+            </div>
+          </div>
+          <div class="chart-grid">
+            <article class="chart-block">
+              <div class="chart-heading">
+                <h3>Observed events per original post</h3>
+                <button
+                  class="icon-button"
+                  data-save="category-diffusion"
+                  title="Download chart"
+                  aria-label="Download category diffusion"
+                >
+                  <i data-lucide="image-down"></i>
+                </button>
+              </div>
+              <div
+                id="category-diffusion"
+                class="chart category-chart"
+                role="img"
+                aria-label="Mean unique diffusion events per original post by root category and mechanism"
+              ></div>
+              <p class="chart-note">
+                Grouped by the original post's category, regardless of the
+                post-type selector. Each verified root/event/mechanism edge is
+                counted once; zero-edge roots remain in the denominator. Top 10
+                root categories by count; smaller categories are pooled.
+              </p>
+            </article>
+            <article class="chart-block">
+              <div class="chart-heading">
+                <h3>Original-to-quote category relationships</h3>
+                <button
+                  class="icon-button"
+                  data-save="category-flow"
+                  title="Download chart"
+                  aria-label="Download original to quote categories"
+                >
+                  <i data-lucide="image-down"></i>
+                </button>
+              </div>
+              <div
+                id="category-flow"
+                class="chart category-chart"
+                role="img"
+                aria-label="Original post category versus downstream quote category heatmap"
+              ></div>
+              <p class="chart-note">
+                One quote per root, including quotes of quotes. Rows describe
+                the FDA original; columns describe the quote's own content.
+                Root-to-descendant associations, not immediate-parent
+                transitions. Top eight categories per axis; smaller categories
+                are pooled.
+              </p>
+            </article>
+          </div>
+          <div class="section-heading">
+            <div>
+              <span class="section-index">03</span>
+              <h2>Crisis-related content &amp; context</h2>
+            </div>
+          </div>
+          <div class="chart-grid">
+            <article class="chart-block">
+              <div class="chart-heading">
+                <h3>Accumulated messages by crisis relevance</h3>
+                <button
+                  class="icon-button"
+                  data-save="crisis-growth"
+                  title="Download chart"
+                  aria-label="Download crisis-related message growth"
+                >
+                  <i data-lucide="image-down"></i>
+                </button>
+              </div>
+              <div
+                id="crisis-growth"
+                class="chart"
+                role="img"
+                aria-label="Accumulated distinct messages by coded crisis relevance and discovery date"
+              ></div>
+              <p class="chart-note">
+                First-observed Chicago dates for the selected post type. Crisis
+                relevance is content coding, not a verified external crisis
+                timeline. None and pending remain separate.
+              </p>
+            </article>
+            <article class="chart-block">
+              <div class="chart-heading">
+                <h3>Original posts by recorded crisis phase</h3>
+                <button
+                  class="icon-button"
+                  data-save="crisis-phase"
+                  title="Download chart"
+                  aria-label="Download recorded crisis phases"
+                >
+                  <i data-lucide="image-down"></i>
+                </button>
+              </div>
+              <div
+                id="crisis-phase"
+                class="chart"
+                role="img"
+                aria-label="Original post counts by recorded crisis context phase"
+              ></div>
+              <p class="chart-note" id="crisis-phase-note"></p>
+            </article>
+          </div>
+          <p class="analysis-context">
+            Current locally coded labels are applied retrospectively to the
+            selected observations, not reconstructed as of each past day. Small
+            and uneven category sizes support exploratory description only.
+            Lower engagement cannot establish an absence of crisis.
           </p>
         </section>
         <section id="methods" class="view" hidden>

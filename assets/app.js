@@ -724,11 +724,18 @@ function render() {
   if (view === "overview") renderOverview(ctx);
   if (view === "diffusion") renderTree(ctx);
   if (view === "trajectories") renderTrajectories(ctx);
+  if (view === "content") renderContent(ctx);
   if (view === "methods") renderMethods(ctx);
   icons();
 }
 function navigate(next) {
-  view = ["overview", "diffusion", "trajectories", "methods"].includes(next)
+  view = [
+    "overview",
+    "diffusion",
+    "trajectories",
+    "content",
+    "methods",
+  ].includes(next)
     ? next
     : "overview";
   if (timer) stopPlay();
@@ -758,6 +765,10 @@ function exportCSV() {
       "anonymous_node_id",
       "mechanism",
       "lookup_status",
+      "root_theme",
+      "content_theme",
+      "content_crisis_relevance",
+      "content_urgency",
       ...data.metrics,
     ],
     ...ctx.obs.map((o) => [
@@ -767,6 +778,16 @@ function exportCSV() {
       o.node,
       o.mechanism,
       o.status,
+      ctx.roots.find((r) => r.id === o.root).theme,
+      ...["theme", "crisisRelevance", "urgencyLevel"].map((key) => {
+        const content =
+          o.mechanism === "original_post"
+            ? ctx.roots.find((r) => r.id === o.root)
+            : o.mechanism === "quote_post"
+              ? ctx.nodes.find((n) => n.id === o.node)
+              : null;
+        return content?.[key] ?? "";
+      }),
       ...o.metrics,
     ]),
   ];
@@ -822,6 +843,9 @@ async function init() {
       .join("");
     $("metric").innerHTML = metricOptions;
     $("heat-metric").innerHTML = metricOptions;
+    $("content-metric").innerHTML = metricOptions;
+    for (const id of ["content-metric", "content-scope", "content-dimension"])
+      $(id).onchange = render;
     $("metric-plots").innerHTML = labels
       .map(
         (l, i) =>
