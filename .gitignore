@@ -1,0 +1,10 @@
+.env*
+.venv/
+node_modules/
+output/
+.playwright-cli/
+*.sql
+*.sql.gz
+*.log
+__pycache__/
+.DS_Store

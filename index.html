@@ -1,0 +1,500 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta
+      name="description"
+      content="Daily engagement trajectories and API-observed repost and quote diffusion across six FDA accounts on X."
+    />
+    <meta name="theme-color" content="#f7f8fa" />
+    <title>FDA/X Research | Daily Diffusion Observatory</title>
+    <link rel="icon" type="image/svg+xml" href="assets/favicon.svg" />
+    <link rel="stylesheet" href="assets/style.css" />
+    <script defer src="assets/vendor/echarts.min.js"></script>
+    <script defer src="assets/vendor/lucide.min.js"></script>
+    <script defer src="assets/app.js"></script>
+  </head>
+  <body>
+    <header class="masthead">
+      <a class="brand" href="#overview"
+        ><span class="brand-mark"><i data-lucide="network"></i></span
+        ><span>FDA<span class="brand-slash">/</span>X <b>Research</b></span></a
+      >
+      <div class="masthead-right">
+        <span class="live-label"
+          ><span class="status-dot"></span> Daily observation</span
+        ><a
+          class="icon-button"
+          href="https://github.com/ygeszvain/fda-x-research"
+          title="View repository"
+          aria-label="View GitHub repository"
+          ><i data-lucide="code-xml"></i
+        ></a>
+      </div>
+    </header>
+    <main>
+      <div class="heading-row">
+        <div>
+          <p class="eyebrow">LONGITUDINAL STUDY / SIX FDA ACCOUNTS</p>
+          <h1>Daily Diffusion Observatory</h1>
+          <p class="subtitle">
+            How public health messages travel, grow, and persist on X.
+          </p>
+        </div>
+        <div class="update-stamp">
+          <span>Latest collection</span
+          ><strong id="latest-date">Loading...</strong
+          ><span>America/Chicago</span>
+        </div>
+      </div>
+      <nav class="tabs" aria-label="Research views">
+        <button data-view="overview" class="active" aria-current="page">
+          <i data-lucide="chart-no-axes-combined"></i> Overview
+        </button>
+        <button data-view="diffusion">
+          <i data-lucide="git-fork"></i> Diffusion explorer
+        </button>
+        <button data-view="trajectories">
+          <i data-lucide="activity"></i> Post trajectories
+        </button>
+        <button data-view="methods">
+          <i data-lucide="database"></i> Data &amp; methods
+        </button>
+      </nav>
+      <div id="error" role="alert" hidden></div>
+      <div id="loading">Loading daily observations...</div>
+      <div id="dashboard" hidden>
+        <div class="filterbar">
+          <div class="field">
+            <label for="account">Account</label
+            ><select id="account">
+              <option value="all">All six accounts</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="theme">Original-post theme</label
+            ><select id="theme">
+              <option value="all">All themes</option>
+            </select>
+          </div>
+          <div class="field">
+            <label for="asof">Through Chicago date</label
+            ><select id="asof"></select>
+          </div>
+          <button
+            id="reset"
+            class="icon-button"
+            title="Reset filters"
+            aria-label="Reset filters"
+          >
+            <i data-lucide="rotate-ccw"></i>
+          </button>
+          <div class="filter-result" id="filter-result"></div>
+          <button id="download" class="text-button">
+            <i data-lucide="download"></i> Export CSV
+          </button>
+        </div>
+        <section id="overview" class="view">
+          <div class="stats" id="stats"></div>
+          <div class="section-heading">
+            <div>
+              <span class="section-index">01</span>
+              <h2>Engagement over time</h2>
+            </div>
+            <div class="control-group">
+              <select id="engagement-scope" aria-label="Engagement post type">
+                <option value="original_post">Original posts</option>
+                <option value="quote_post">Quote posts</option></select
+              ><select id="metric" aria-label="Engagement metric"></select>
+            </div>
+          </div>
+          <div class="chart-grid">
+            <article class="chart-block">
+              <div class="chart-heading">
+                <h3>Cumulative counts by account</h3>
+                <button
+                  class="icon-button"
+                  data-save="growth"
+                  title="Download chart"
+                  aria-label="Download cumulative chart"
+                >
+                  <i data-lucide="image-down"></i>
+                </button>
+              </div>
+              <div
+                id="growth"
+                class="chart"
+                role="img"
+                aria-label="Cumulative engagement line chart"
+              ></div>
+              <p class="chart-note" id="growth-note"></p>
+            </article>
+            <article class="chart-block">
+              <div class="chart-heading">
+                <h3>Net change since the prior day</h3>
+                <button
+                  class="icon-button"
+                  data-save="changes"
+                  title="Download chart"
+                  aria-label="Download change chart"
+                >
+                  <i data-lucide="image-down"></i>
+                </button>
+              </div>
+              <div
+                id="changes"
+                class="chart"
+                role="img"
+                aria-label="Matched daily engagement change chart"
+              ></div>
+              <p class="chart-note" id="changes-note"></p>
+            </article>
+          </div>
+          <div class="section-heading">
+            <div>
+              <span class="section-index">02</span>
+              <h2>Diffusion, day by day</h2>
+            </div>
+            <div class="segmented" aria-label="Diffusion time basis">
+              <button data-basis="firstSeen" class="active">
+                First observed</button
+              ><button data-basis="created">Event created</button>
+            </div>
+          </div>
+          <div class="chart-grid">
+            <article class="chart-block">
+              <div class="chart-heading">
+                <h3>Newly observed diffusion events</h3>
+                <button
+                  class="icon-button"
+                  data-save="new-events"
+                  title="Download chart"
+                  aria-label="Download daily diffusion chart"
+                >
+                  <i data-lucide="image-down"></i>
+                </button>
+              </div>
+              <div
+                id="new-events"
+                class="chart"
+                role="img"
+                aria-label="Daily diffusion mechanisms stacked bars"
+              ></div>
+              <p class="chart-note" id="events-note"></p>
+            </article>
+            <article class="chart-block">
+              <div class="chart-heading">
+                <h3>Accumulated observed network</h3>
+                <button
+                  class="icon-button"
+                  data-save="network-growth"
+                  title="Download chart"
+                  aria-label="Download network growth chart"
+                >
+                  <i data-lucide="image-down"></i>
+                </button>
+              </div>
+              <div
+                id="network-growth"
+                class="chart"
+                role="img"
+                aria-label="Cumulative observed diffusion edges"
+              ></div>
+              <p class="chart-note">
+                Each unique event is counted once. Repeated daily snapshots do
+                not add new edges.
+              </p>
+            </article>
+          </div>
+          <div class="section-heading">
+            <div>
+              <span class="section-index">03</span>
+              <h2>Topics &amp; cohort</h2>
+            </div>
+          </div>
+          <div class="chart-grid">
+            <article class="chart-block">
+              <h3>Original-post themes</h3>
+              <div
+                id="themes"
+                class="chart"
+                role="img"
+                aria-label="Original post count by theme"
+              ></div>
+              <p class="chart-note">
+                Locally coded themes describe message content. Small category
+                sizes support descriptive comparisons only.
+              </p>
+            </article>
+            <article class="chart-block">
+              <h3>Daily original-post observations</h3>
+              <div
+                id="cohort"
+                class="chart"
+                role="img"
+                aria-label="Daily original post count by account"
+              ></div>
+              <p class="chart-note">
+                The original cohort is retained. Accounts below two originals
+                remain eligible for targeted admission.
+              </p>
+            </article>
+          </div>
+        </section>
+        <section id="diffusion" class="view" hidden>
+          <div class="section-heading">
+            <div>
+              <span class="section-index">01</span>
+              <h2>Observed diffusion tree</h2>
+            </div>
+            <div class="control-group">
+              <label class="sr-only" for="tree-root">Original post</label
+              ><select id="tree-root"></select
+              ><button
+                id="tree-reset"
+                class="icon-button"
+                title="Reset tree view"
+                aria-label="Reset tree view"
+              >
+                <i data-lucide="scan"></i></button
+              ><button
+                class="icon-button"
+                data-save="tree"
+                title="Download tree"
+                aria-label="Download diffusion tree"
+              >
+                <i data-lucide="image-down"></i>
+              </button>
+            </div>
+          </div>
+          <div id="tree-summary" class="post-context"></div>
+          <div class="timeline">
+            <button
+              id="play"
+              class="icon-button"
+              title="Play daily diffusion"
+              aria-label="Play daily diffusion"
+            >
+              <i data-lucide="play"></i></button
+            ><label for="tree-day">Observed through</label
+            ><input
+              id="tree-day"
+              type="range"
+              min="0"
+              max="0"
+              value="0"
+            /><output id="tree-date" for="tree-day"></output>
+          </div>
+          <div class="legend" id="tree-legend"></div>
+          <div
+            id="tree"
+            class="tree-chart"
+            role="img"
+            aria-label="Interactive tree of API-verified repost and quote links"
+          ></div>
+          <div id="node-detail" class="node-detail" aria-live="polite">
+            Select a node to inspect its observed relationship and latest
+            returned metrics.
+          </div>
+          <p class="chart-note">
+            Branches are explicit API parent links. Public downstream nodes use
+            anonymous labels. Hidden or unavailable links are not inferred.
+            Expand a branch by selecting its node.
+          </p>
+          <div class="section-heading">
+            <div>
+              <span class="section-index">02</span>
+              <h2>Every original post</h2>
+            </div>
+          </div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Original post</th>
+                  <th>Account</th>
+                  <th>Observed reposts</th>
+                  <th>Quote posts</th>
+                  <th>Reposts of quotes</th>
+                  <th>Depth</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="roots-table"></tbody>
+            </table>
+          </div>
+        </section>
+        <section id="trajectories" class="view" hidden>
+          <div class="section-heading">
+            <div>
+              <span class="section-index">01</span>
+              <h2>Six engagement trajectories</h2>
+            </div>
+            <div class="control-group">
+              <select
+                id="post-root"
+                aria-label="Trajectory original post"
+              ></select>
+              <div class="segmented">
+                <button data-xaxis="date" class="active">Chicago date</button
+                ><button data-xaxis="age">Post age</button>
+              </div>
+            </div>
+          </div>
+          <div id="post-summary" class="post-context"></div>
+          <div class="small-multiples" id="metric-plots"></div>
+          <div class="section-heading">
+            <div>
+              <span class="section-index">02</span>
+              <h2>Activity across original posts</h2>
+            </div>
+            <select
+              id="heat-metric"
+              aria-label="Activity heatmap metric"
+            ></select>
+          </div>
+          <div
+            id="heatmap"
+            class="heatmap-chart"
+            role="img"
+            aria-label="Original post by date net engagement change heatmap"
+          ></div>
+          <p class="chart-note">
+            Cells show net change between consecutive returned daily snapshots.
+            A blank cell means no comparable pair; first observations are not
+            assigned a zero baseline.
+          </p>
+        </section>
+        <section id="methods" class="view" hidden>
+          <div class="section-heading">
+            <div>
+              <span class="section-index">01</span>
+              <h2>Collection coverage</h2>
+            </div>
+            <span class="subtle">Whole study cohort</span>
+          </div>
+          <div
+            id="coverage"
+            class="chart"
+            role="img"
+            aria-label="Daily returned observation coverage by mechanism"
+          ></div>
+          <div class="table-scroll">
+            <table>
+              <thead>
+                <tr>
+                  <th>Chicago date</th>
+                  <th>Mechanism</th>
+                  <th>Expected</th>
+                  <th>Attempted</th>
+                  <th>Returned</th>
+                  <th>Missing</th>
+                  <th>Attempt coverage</th>
+                </tr>
+              </thead>
+              <tbody id="coverage-table"></tbody>
+            </table>
+          </div>
+          <div class="methods-grid">
+            <article>
+              <h2>What is measured</h2>
+              <p>
+                Public cumulative counters for views (impressions), likes,
+                reposts, replies, quotes, and bookmarks are collected once
+                daily. Day labels use America/Chicago. Values are observed
+                counters, not unique people.
+              </p>
+              <p>
+                Growth curves sum values returned on each date. Cohort additions
+                and missing observations can change these totals. Net-change
+                charts use only the same posts observed on consecutive Chicago
+                dates; decreases remain visible as counter corrections.
+              </p>
+            </article>
+            <article>
+              <h2>What the graph establishes</h2>
+              <p>
+                An edge requires an API-verified immediate parent. Direct
+                reposts, quotes, quotes of quotes, and reposts of quotes remain
+                distinguishable. Cumulative counters may exceed the number of
+                discoverable event IDs.
+              </p>
+              <p>
+                The observed network is a lower bound. Repeated event retrieval
+                is not new diffusion. Creation-date views describe when events
+                occurred; first-observed views describe when collection
+                discovered them.
+              </p>
+            </article>
+            <article>
+              <h2>Cohort &amp; follow-up</h2>
+              <p>
+                The six-account study preserves its baseline and admits
+                additional originals only for accounts below two. Eligible posts
+                were new in the completed Chicago collection window; a midnight
+                first observation can fall on the next calendar date.
+              </p>
+              <p>
+                Roots can enter checkpoint-only collection after two consecutive
+                zero-change daily intervals. Day-30, day-60, and day-90
+                observations remain required. Changed checkpoints reactivate
+                daily collection.
+              </p>
+            </article>
+            <article>
+              <h2>Research questions</h2>
+              <p>
+                RQ1 describes engagement timing and persistence. RQ2 compares
+                message and account characteristics. RQ3 examines observed
+                diffusion. RQ4 tests prediction at 30, 60, and 90 days when
+                outcomes mature.
+              </p>
+              <p>
+                Forecast training uses earlier-created posts and testing uses
+                later-created posts, keeping each post in one partition. Current
+                short follow-up and small sample sizes do not support strong
+                predictive or causal claims.
+              </p>
+            </article>
+            <article>
+              <h2>Public export</h2>
+              <p>
+                Only curated daily metrics, FDA post summaries, coded themes,
+                and anonymous downstream nodes are published. API payloads,
+                database backups, credentials, and downstream authors' text and
+                handles remain outside this repository.
+              </p>
+              <p id="provenance"></p>
+              <a class="text-link" href="data/dashboard.json" download
+                >Download public dataset <i data-lucide="download"></i
+              ></a>
+            </article>
+            <article>
+              <h2>Observation status</h2>
+              <p>
+                Missing API responses remain missing. Charts never convert
+                absent metrics to zero or carry earlier values into a later
+                collection date. A gap in collection is not evidence that
+                engagement stopped.
+              </p>
+              <p>
+                This is an independent dissertation research project. It is not
+                an official FDA publication and is not affiliated with X.
+              </p>
+            </article>
+          </div>
+        </section>
+        <footer>
+          <span
+            >FDA/X Research <span class="footer-sep">/</span> Daily Diffusion
+            Observatory</span
+          ><span id="footer-range"></span
+          ><a href="https://github.com/ygeszvain/fda-x-research"
+            >Source &amp; methodology <i data-lucide="arrow-up-right"></i
+          ></a>
+        </footer>
+      </div>
+    </main>
+  </body>
+</html>

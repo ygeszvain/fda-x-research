@@ -1,0 +1,8 @@
+{
+  "name": "fda-x-research-observatory",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Public FDA/X daily engagement and observed diffusion dashboard",
+  "scripts": {"vendor": "node scripts/vendor.mjs"},
+  "dependencies": {"echarts": "6.1.0", "lucide": "1.41.0"}
+}
